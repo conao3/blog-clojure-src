@@ -6,6 +6,7 @@
    [stasis.core :as stasis]
    [ring.adapter.jetty :as jetty]))
 
+(def blog-name "Conao3 Notes")
 (def stasis-config {:stasis/ignore-nil-pages? true})
 
 (def pages
@@ -17,13 +18,13 @@
   (hiccup.page/html5
    [:head
     [:meta {:http-equiv "Content-Type" :content "text/html; charset=utf-8"}]
-    [:title title]
+    [:title (format "%s - %s" title blog-name)]
     (hiccup.page/include-css "/assets/modern-css-reset.css")
     (hiccup.page/include-css "/assets/spectrum/color-palette.css")
     (hiccup.page/include-css "/assets/spectrum/typography.css")
     (hiccup.page/include-css "/assets/index.css")]
    [:body
-    [:h2 "Conao3 Note"]
+    [:h2 blog-name]
     [:div {:style {:display "flex"}}
      [:a {:href "/"} "Home"]]
     (hiccup/raw body)]))
