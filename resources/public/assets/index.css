@@ -8,3 +8,7 @@ html {
     font-size: var(--font-size-200);
     font-family: sans-serif;
 }
+
+a {
+    color: var(--blue-700);
+}
