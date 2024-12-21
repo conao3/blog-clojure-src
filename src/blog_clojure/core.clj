@@ -14,7 +14,8 @@
 (defn render-page [{:keys [title content]}]
   (hiccup.page/html5
     [:head
-     [:title title]]
+     [:title title]
+     (hiccup.page/include-css "/assets/color-palette.css")]
     [:body
      [:h1 title]
      [:p content]]))
@@ -25,8 +26,7 @@
                 (map (fn [[path data]]
                        [path (and data (render-page data))]))
                 (into {}))
-    :assets (-> (stasis/slurp-directory "resources/public" #"\.[^.]+$")
-                (update-keys (partial str "/assets")))}))
+    :assets (stasis/slurp-directory "resources/public" #"\.[^.]+$")}))
 
 (defn export [& _args]
   (let [export-dir "./target"

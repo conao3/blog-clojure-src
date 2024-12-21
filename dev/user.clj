@@ -56,7 +56,7 @@
           (map (fn [[k v]] (format "--%s: %s;\n" (name k) (format-val v))))
           (apply str)
           (format ":root {\n%s}\n")
-          (spit (format "resources/public/%s.css" file))))))
+          (spit (format "resources/public/assets/%s.css" file))))))
 
 (defn generate-css []
   (doseq [file ["color-aliases"
