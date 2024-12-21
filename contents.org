@@ -8,10 +8,9 @@
 
 (defun stasis-md-template (contents info)
   (concat
-   "---\n"
-   (format "title: \"%s\"\n" (car (plist-get info :title)))
-   (format "date: \"%s\"\n" (car (plist-get info :date)))
-   "---\n\n"
+   (format "Title: %s\n" (car (plist-get info :title)))
+   (format "Date: %s\n" (car (plist-get info :date)))
+   "\n\n"
    contents))
 
 (defun my/stasis-export ()
@@ -39,7 +38,7 @@ my/stasis-export
 * Hello Clojure
 :properties:
 :export_title: Hello Clojure
-:export_file_name: generated/contents/2024/5a7fcc.md
+:export_file_name: generated/contents/blog/2024/5a7fcc.md
 :export_date: 2024-12-21
 :end:
 

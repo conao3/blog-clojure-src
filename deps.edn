@@ -1,6 +1,7 @@
 {:deps
  {org.clojure/clojure {:mvn/version "1.12.0"}
   org.clojure/data.json {:mvn/version "2.5.1"}
+  markdown-clj/markdown-clj {:mvn/version "1.12.2"}
   stasis/stasis {:mvn/version "2023.11.21"}
   babashka/fs {:mvn/version "0.5.23"}
   ring/ring-core {:mvn/version "1.13.0"}

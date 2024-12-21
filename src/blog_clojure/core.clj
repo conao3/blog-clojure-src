@@ -1,6 +1,8 @@
 (ns blog-clojure.core
   (:require
+   [markdown.core :as markdown]
    [hiccup.page :as hiccup.page]
+   [hiccup2.core :as hiccup]
    [stasis.core :as stasis]
    [ring.adapter.jetty :as jetty]))
 
@@ -11,24 +13,25 @@
    "/about.html" {:title "About" :content "This is a simple static site!"}
    "/hey.html" nil})
 
-(defn render-page [{:keys [title content]}]
+(defn render-page [title body]
   (hiccup.page/html5
-    [:head
-     [:title title]
-     (hiccup.page/include-css "/assets/modern-css-reset.css")
-     (hiccup.page/include-css "/assets/spectrum/color-palette.css")
-     (hiccup.page/include-css "/assets/spectrum/typography.css")
-     (hiccup.page/include-css "/assets/index.css")]
-    [:body
-     [:h1 title]
-     [:p content]]))
+   [:head
+    [:meta {:http-equiv "Content-Type" :content "text/html; charset=utf-8"}]
+    [:title title]
+    (hiccup.page/include-css "/assets/modern-css-reset.css")
+    (hiccup.page/include-css "/assets/spectrum/color-palette.css")
+    (hiccup.page/include-css "/assets/spectrum/typography.css")
+    (hiccup.page/include-css "/assets/index.css")]
+   [:body
+    (hiccup/raw body)]))
 
 (defn site []
   (stasis/merge-page-sources
-   {:pages (->> pages
-                (map (fn [[path data]]
-                       [path (and data (render-page data))]))
-                (into {}))
+   {:contents (->> (stasis/slurp-directory "generated/contents" #"\.md$")
+                   (map (fn [[k v]] (let [p (markdown/md-to-html-string-with-meta v :heading-anchors true)]
+                                      [(str (subs k 0 (- (count k) 3)) ".html")
+                                       (render-page (first (:title (:metadata p))) (:html p))])))
+                   (into {}))
     :public (stasis/slurp-directory "resources/public" #"\.[^.]+$")
     :spectrum (-> (stasis/slurp-directory "generated/spectrum" #"\.[^.]+$")
                   (update-keys (partial str "/assets/spectrum")))}))
