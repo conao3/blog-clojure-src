@@ -9,11 +9,6 @@
 (def blog-name "Conao3 Notes")
 (def stasis-config {:stasis/ignore-nil-pages? true})
 
-(def pages
-  {"/index.html" {:title "Home" :content "Welcome to my static site!"}
-   "/about.html" {:title "About" :content "This is a simple static site!"}
-   "/hey.html" nil})
-
 (defn render-page [{:keys [title body]}]
   (hiccup.page/html5
    [:head
