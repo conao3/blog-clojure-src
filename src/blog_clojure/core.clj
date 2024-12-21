@@ -13,7 +13,7 @@
    "/about.html" {:title "About" :content "This is a simple static site!"}
    "/hey.html" nil})
 
-(defn render-page [title body]
+(defn render-page [{:keys [title body]}]
   (hiccup.page/html5
    [:head
     [:meta {:http-equiv "Content-Type" :content "text/html; charset=utf-8"}]
@@ -25,12 +25,23 @@
    [:body
     (hiccup/raw body)]))
 
+(defn render-content [{:keys [title body]}]
+  (hiccup/html
+   [:article
+    [:h1 title]
+    [:hr]
+    (hiccup/raw body)]))
+
 (defn site []
   (stasis/merge-page-sources
    {:contents (->> (stasis/slurp-directory "generated/contents" #"\.md$")
-                   (map (fn [[k v]] (let [p (markdown/md-to-html-string-with-meta v :heading-anchors true)]
+                   (map (fn [[k v]] (let [p (markdown/md-to-html-string-with-meta v :heading-anchors true)
+                                          obj {:title (first (:title (:metadata p)))
+                                               :body (:html p)}]
                                       [(str (subs k 0 (- (count k) 3)) ".html")
-                                       (render-page (first (:title (:metadata p))) (:html p))])))
+                                       (-> obj
+                                          (assoc :body (render-content obj))
+                                          render-page)])))
                    (into {}))
     :public (stasis/slurp-directory "resources/public" #"\.[^.]+$")
     :spectrum (-> (stasis/slurp-directory "generated/spectrum" #"\.[^.]+$")
