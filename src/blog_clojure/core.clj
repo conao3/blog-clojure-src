@@ -15,7 +15,7 @@
   (hiccup.page/html5
     [:head
      [:title title]
-     (hiccup.page/include-css "/assets/color-palette.css")
+     (hiccup.page/include-css "/assets/spectrum/color-palette.css")
      (hiccup.page/include-css "/assets/index.css")]
     [:body
      [:h1 title]
@@ -27,7 +27,9 @@
                 (map (fn [[path data]]
                        [path (and data (render-page data))]))
                 (into {}))
-    :assets (stasis/slurp-directory "resources/public" #"\.[^.]+$")}))
+    :public (stasis/slurp-directory "resources/public" #"\.[^.]+$")
+    :spectrum (-> (stasis/slurp-directory "generated/spectrum" #"\.[^.]+$")
+                  (update-keys (partial str "/assets/spectrum")))}))
 
 (defn export [& _args]
   (let [export-dir "./target"

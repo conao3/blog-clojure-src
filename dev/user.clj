@@ -2,7 +2,8 @@
   (:require
    [blog-clojure.core :as blog-clojure]
    [clojure.java.io :as io]
-   [clojure.data.json :as json]))
+   [clojure.data.json :as json]
+   [babashka.fs :as fs]))
 
 (defonce server (atom nil))
 
@@ -56,7 +57,7 @@
           (map (fn [[k v]] (format "--%s: %s;\n" (name k) (format-val v))))
           (apply str)
           (format ":root {\n%s}\n")
-          (spit (format "resources/public/assets/%s.css" file))))))
+          (spit (format "generated/spectrum/%s.css" file))))))
 
 (defn generate-css []
   (doseq [file ["color-aliases"
@@ -67,5 +68,6 @@
                 "layout-component"
                 "semantic-color-palette"
                 "typography"]]
+    (fs/create-dirs "generated/spectrum")
     (println (format "generating %s.css..." file))
     (generate-css-1 file)))
