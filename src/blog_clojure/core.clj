@@ -32,18 +32,27 @@
     (hiccup/raw body)]))
 
 (defn site []
-  (let [contents (stasis/slurp-directory "generated/contents" #"\.md$")]
+  (let [contents (->> (stasis/slurp-directory "generated/contents" #"\.md$")
+                      (map (fn [[k v]]
+                             (let [p (markdown/md-to-html-string-with-meta v :heading-anchors true)
+                                   obj {:title (first (:title (:metadata p)))
+                                        :body (:html p)}]
+                               [(str (subs k 0 (- (count k) 3)) ".html")
+                                (assoc obj :body (render-content obj))])))
+                      (into {}))
+        blog-inx (hiccup/html
+                  [:div
+                   [:h1 "Blogs"]
+                   [:ul
+                    (->> contents
+                         (map
+                          (fn [[k v]] [:li [:a {:href k} (:title v)]])))]])
+        contents (update-in contents ["/index.html" :body]
+                            #(str % blog-inx))]
     (stasis/merge-page-sources
-     {:contents (->> contents
-                     (map (fn [[k v]]
-                            (let [p (markdown/md-to-html-string-with-meta v :heading-anchors true)
-                                  obj {:title (first (:title (:metadata p)))
-                                       :body (:html p)}]
-                              [(str (subs k 0 (- (count k) 3)) ".html")
-                               (-> obj
-                                   (assoc :body (render-content obj))
-                                   render-page)])))
-                     (into {}))
+     {:contents (-> contents
+                    (update-vals render-page)
+                    (->> (into {})))
       :public (stasis/slurp-directory "resources/public" #"\.[^.]+$")
       :spectrum (-> (stasis/slurp-directory "generated/spectrum" #"\.[^.]+$")
                     (update-keys (partial str "/assets/spectrum")))})))
