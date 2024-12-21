@@ -23,7 +23,7 @@
                          [path (render-page data)]))
                   pages)}))
 
-(defn export []
+(defn export [& _args]
   (stasis/export-pages (site) "target/"))
 
 (defn start-server [& _args]
