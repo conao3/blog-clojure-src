@@ -1,6 +1,8 @@
 (ns user
   (:require
-   [blog-clojure.core :as blog-clojure]))
+   [blog-clojure.core :as blog-clojure]
+   [clojure.java.io :as io]
+   [clojure.data.json :as json]))
 
 (defonce server (atom nil))
 
@@ -9,4 +11,59 @@
        future
        (reset! server)))
 
+(defn generate-css-1 [file]
+  (letfn [(getfn [m]
+            (let [schema (:$schema m)
+                  known-value-types #{"https://opensource.adobe.com/spectrum-tokens/schemas/token-types/alias.json"
+                                      "https://opensource.adobe.com/spectrum-tokens/schemas/token-types/color.json"
+                                      "https://opensource.adobe.com/spectrum-tokens/schemas/token-types/opacity.json"
+                                      "https://opensource.adobe.com/spectrum-tokens/schemas/token-types/dimension.json"
+                                      "https://opensource.adobe.com/spectrum-tokens/schemas/token-types/multiplier.json"
+                                      "https://opensource.adobe.com/spectrum-tokens/schemas/token-types/font-weight.json"
+                                      "https://opensource.adobe.com/spectrum-tokens/schemas/token-types/font-size.json"
+                                      "https://opensource.adobe.com/spectrum-tokens/schemas/token-types/text-transform.json"
+                                      "https://opensource.adobe.com/spectrum-tokens/schemas/token-types/font-family.json"
+                                      "https://opensource.adobe.com/spectrum-tokens/schemas/token-types/font-style.json"}]
+              (cond
+                (= "https://opensource.adobe.com/spectrum-tokens/schemas/token-types/color-set.json"
+                   schema)
+                (getfn (get-in m [:sets :darkest]))
 
+                (= "https://opensource.adobe.com/spectrum-tokens/schemas/token-types/system-set.json"
+                   schema)
+                (getfn (get-in m [:sets :spectrum]))
+
+                (= "https://opensource.adobe.com/spectrum-tokens/schemas/token-types/scale-set.json"
+                   schema)
+                (getfn (get-in m [:sets :desktop]))
+
+                (known-value-types schema)
+                (:value m)
+
+                :else
+                (throw (ex-info "unknown schema" {:schema schema})))))
+          (format-val [v]
+            (if-let [m (and (string? v)
+                            (re-matches #"\{(.*)\}" v))]
+              (format "var(--%s)" (second m))
+              (cond->> v (double? v) (format "%.2f"))))]
+    (->
+     (json/read-str (slurp (io/resource (format "spectrum/%s.json" file))) :key-fn keyword)
+     (update-vals getfn)
+     (->> (sort-by key)
+          (map (fn [[k v]] (format "--%s: %s;\n" (name k) (format-val v))))
+          (apply str)
+          (format ":root {\n%s}\n")
+          (spit (format "resources/public/%s.css" file))))))
+
+(defn generate-css []
+  (doseq [file ["color-aliases"
+                "color-component"
+                "color-palette"
+                "icons"
+                "layout"
+                "layout-component"
+                "semantic-color-palette"
+                "typography"]]
+    (println (format "generating %s.css..." file))
+    (generate-css-1 file)))
