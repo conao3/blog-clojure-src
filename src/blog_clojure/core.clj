@@ -24,7 +24,9 @@
    {:pages (->> pages
                 (map (fn [[path data]]
                        [path (and data (render-page data))]))
-                (into {}))}))
+                (into {}))
+    :assets (-> (stasis/slurp-directory "resources/public" #"\.[^.]+$")
+                (update-keys (partial str "/assets")))}))
 
 (defn export [& _args]
   (let [export-dir "./target"
