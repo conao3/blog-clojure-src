@@ -23,6 +23,9 @@
     (hiccup.page/include-css "/assets/spectrum/typography.css")
     (hiccup.page/include-css "/assets/index.css")]
    [:body
+    [:h2 "Conao3 Note"]
+    [:div {:style {:display "flex"}}
+     [:a {:href "/"} "Home"]]
     (hiccup/raw body)]))
 
 (defn render-content [{:keys [title body]}]
