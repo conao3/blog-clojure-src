@@ -32,20 +32,21 @@
     (hiccup/raw body)]))
 
 (defn site []
-  (stasis/merge-page-sources
-   {:contents (->> (stasis/slurp-directory "generated/contents" #"\.md$")
-                   (map (fn [[k v]]
-                          (let [p (markdown/md-to-html-string-with-meta v :heading-anchors true)
-                                obj {:title (first (:title (:metadata p)))
-                                     :body (:html p)}]
-                            [(str (subs k 0 (- (count k) 3)) ".html")
-                             (-> obj
-                                 (assoc :body (render-content obj))
-                                 render-page)])))
-                   (into {}))
-    :public (stasis/slurp-directory "resources/public" #"\.[^.]+$")
-    :spectrum (-> (stasis/slurp-directory "generated/spectrum" #"\.[^.]+$")
-                  (update-keys (partial str "/assets/spectrum")))}))
+  (let [contents (stasis/slurp-directory "generated/contents" #"\.md$")]
+    (stasis/merge-page-sources
+     {:contents (->> contents
+                     (map (fn [[k v]]
+                            (let [p (markdown/md-to-html-string-with-meta v :heading-anchors true)
+                                  obj {:title (first (:title (:metadata p)))
+                                       :body (:html p)}]
+                              [(str (subs k 0 (- (count k) 3)) ".html")
+                               (-> obj
+                                   (assoc :body (render-content obj))
+                                   render-page)])))
+                     (into {}))
+      :public (stasis/slurp-directory "resources/public" #"\.[^.]+$")
+      :spectrum (-> (stasis/slurp-directory "generated/spectrum" #"\.[^.]+$")
+                    (update-keys (partial str "/assets/spectrum")))})))
 
 (defn export [& _args]
   (let [export-dir "./target"
