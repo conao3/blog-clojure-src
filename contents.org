@@ -35,9 +35,9 @@
 my/stasis-export
 :end:
 
-* Hello Clojure
+* Hello Stasis
 :properties:
-:export_title: Hello Clojure
+:export_title: Hello Stasis
 :export_file_name: generated/contents/blog/2024/5a7fcc.md
 :export_date: 2024-12-21
 :end:
@@ -55,5 +55,5 @@ stasisはClojureの静的ブログ生成ライブラリで、主張がほとん�
 descriptionには「Some Clojure functions for creating static websites.」とあります。
 その説明通り、提供されているのは単なる関数なので、それを自分で組み合わせてオレオレフレームワークを作ろうぜという世界観です。
 
-ソースは[[https://github.com/conao3/blog-clojure-src][conao3/blog-clojure-src]]においてあります。
+ソースは[[https://github.com/conao3/blog-stasis-src][conao3/blog-stasis-src]]においてあります。
 ひとまずこんなところで。
