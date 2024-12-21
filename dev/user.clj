@@ -8,8 +8,9 @@
 (defonce server (atom nil))
 
 (defn go []
+  (when @server
+    (.stop @server))
   (->> (blog-clojure/start-server)
-       future
        (reset! server)))
 
 (defn generate-css-1 [file]
