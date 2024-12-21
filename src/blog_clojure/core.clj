@@ -24,7 +24,14 @@
                   pages)}))
 
 (defn export [& _args]
-  (stasis/export-pages (site) "target/"))
+  (let [export-dir "./target"
+        load-export-dir #(stasis/slurp-directory export-dir #"\.[^.]+$")
+        old-files (load-export-dir)]
+    (stasis/empty-directory! export-dir)
+    (println "Exporting...")
+    (stasis/export-pages (site) "target/")
+    (println "Export complete:")
+    (stasis/report-differences old-files (load-export-dir))))
 
 (defn start-server [& _args]
   (jetty/run-jetty
