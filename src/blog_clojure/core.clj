@@ -24,10 +24,11 @@
      [:a {:href "/"} "Home"]]
     (hiccup/raw body)]))
 
-(defn render-content [{:keys [title body]}]
+(defn render-content [{:keys [title body date]}]
   (hiccup/html
    [:article
     [:h1 title]
+    [:div date]
     [:hr]
     (hiccup/raw body)]))
 
@@ -36,6 +37,7 @@
                       (map (fn [[k v]]
                              (let [p (markdown/md-to-html-string-with-meta v :heading-anchors true)
                                    obj {:title (first (:title (:metadata p)))
+                                        :date (first (:date (:metadata p)))
                                         :body (:html p)}]
                                [(str (subs k 0 (- (count k) 3)) ".html")
                                 (assoc obj :body (render-content obj))])))
@@ -45,8 +47,9 @@
                    [:h1 "Blogs"]
                    [:ul
                     (->> contents
-                         (map
-                          (fn [[k v]] [:li [:a {:href k} (:title v)]])))]])
+                         (map (fn [[k v]] [:li [:a {:href k} (:title v)]]))
+                         (sort-by (comp :date second))
+                         reverse)]])
         contents (update-in contents ["/index.html" :body]
                             #(str % blog-inx))]
     (stasis/merge-page-sources
@@ -70,4 +73,4 @@
 (defn start-server [& _args]
   (jetty/run-jetty
     (stasis/serve-pages site stasis-config)
-    {:port 8080}))
+    {:port 8080 :join? false}))
