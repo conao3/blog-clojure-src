@@ -15,7 +15,8 @@
   (hiccup.page/html5
     [:head
      [:title title]
-     (hiccup.page/include-css "/assets/color-palette.css")]
+     (hiccup.page/include-css "/assets/color-palette.css")
+     (hiccup.page/include-css "/assets/index.css")]
     [:body
      [:h1 title]
      [:p content]]))
