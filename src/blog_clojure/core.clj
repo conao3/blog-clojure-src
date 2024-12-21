@@ -28,12 +28,5 @@
 
 (defn start-server [& _args]
   (jetty/run-jetty
-    (fn [req]
-      (let [path (:uri req)
-            page ((site) path)]
-        (if page
-          {:status 200
-           :headers {"Content-Type" "text/html"}
-           :body page}
-          {:status 404 :body "Page not found"})))
+    (stasis/serve-pages site)
     {:port 8080}))
