@@ -50,7 +50,9 @@
     (->
      (json/read-str (slurp (io/resource (format "spectrum/%s.json" file))) :key-fn keyword)
      (update-vals getfn)
-     (->> (sort-by key)
+     (->> (sort-by (fn [[k _]] (if-let [m (re-matches #"^(.*)-([0-9]+)$" (name k))]
+                                 (str (nth m 1) (format "%05d" (parse-long (nth m 2))))
+                                 (name k))))
           (map (fn [[k v]] (format "--%s: %s;\n" (name k) (format-val v))))
           (apply str)
           (format ":root {\n%s}\n")
