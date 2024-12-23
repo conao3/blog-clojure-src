@@ -13,6 +13,7 @@
   (hiccup.page/html5
    [:head
     [:meta {:http-equiv "Content-Type" :content "text/html; charset=utf-8"}]
+    [:meta {:name "viewport" :content "width=device-width,initial-scale=1"}]
     [:title (format "%s - %s" title blog-name)]
     (hiccup.page/include-css "/assets/modern-css-reset.css")
     (hiccup.page/include-css "/assets/spectrum/color-palette.css")
