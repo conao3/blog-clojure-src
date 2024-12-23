@@ -69,3 +69,106 @@ descriptionには「Some Clojure functions for creating static websites.」と�
 
 ソースは[[https://github.com/conao3/blog-stasis-src][conao3/blog-stasis-src]]においてあります。
 ひとまずこんなところで。
+
+* ClojureでEcho Server
+:properties:
+:export_title: ClojureでEcho Server
+:export_file_name: generated/contents/blog/2024/4d880f.md
+:export_date: 2024-12-23
+:end:
+
+ClojureでTCPソケットを使ったプログラムを書きたくなりました。
+TCPソケットを使おうと思ったら書くのがEcho Serverですね。書きましょう。
+
+ライブラリなしで書くときはとりあえずcoreのドキュメントを参照します。
+https://clojure.github.io/clojure/index.html
+
+しかし、ソケット通信のためのAPIは用意されてないので、javaのドキュメントを参照します。
+Clojureが利用しているJDKのバージョンは以下で調べることができます
+
+#+begin_src clojure
+(System/getProperty "java.version")
+;;=> "21.0.5
+#+end_src
+
+JDK21のドキュメントはこちらです。
+- https://docs.oracle.com/javase/jp/21/index.html
+- https://docs.oracle.com/javase/jp/21/docs/api/index.html
+
+=java.net= を使うことで実装できそうです。
+
+** 調査
+まずサーバー側のソケットを作り、 =accept= で待ち受けます。
+=accept= は通信要求が来るまでブロッキングされます。
+
+#+begin_src clojure
+(def server-socket (java.net.ServerSocket. 15390))
+;;=> #'user/server-socket
+
+(def client-socket (. server-socket accept))
+;;=> #'user/client-socket
+#+end_src
+
+なお、クライアントは =telnet= で試すことができます。
+=telnet= は =C-]= を押すと通信を止めることができます。
+
+#+begin_src sh
+$ telnet localhost 15390
+Trying ::1...
+Connected to localhost.
+Escape character is '^]'.
+#+end_src
+
+サーバー側に戻ります。
+=client-socket= を得ることができたら、 =io/reader= と =io/writer= により、ioを得ることができます。
+#+begin_src clojure
+(def input-stream (io/reader client-socket))
+;;=> #'user/input-stream
+
+(def output-stream (io/writer client-socket))
+;;=> #'user/output-stream
+#+end_src
+
+=io/reader= の返り値のため、 =readLine= などを利用することができます。
+#+begin_src clojure
+(. input-stream readLine)
+;;=> "asdf"
+#+end_src
+
+=readLine= は ="\n"= が入力されるまでブロッキングします。
+
+** 実装
+調査を受けて、実装はこちらです。
+
+#+begin_src clojure
+(ns echo-server.core
+  (:require
+   [clojure.java.io :as io])
+  (:import
+   [java.net ServerSocket]
+   [java.io BufferedReader BufferedWriter])
+  (:gen-class))
+
+(defn handle-client [client-socket]
+  (let [input-stream ^BufferedReader (io/reader client-socket)
+        output-stream ^BufferedWriter (io/writer client-socket)]
+    (loop []
+      (let [inpt (. input-stream readLine)]
+        (println "Received: " inpt)
+        (when (and inpt (not= "" inpt))
+          (. output-stream write (str inpt "\n"))
+          (. output-stream flush))
+        (when-not (nil? inpt)         ; nil indicates EOF
+          (recur))))))
+
+(defn start-server []
+  (println "Listening localhost:15390")
+  (let [server-socket (ServerSocket. 15390)]
+    (loop []
+      (let [client-socket (. server-socket accept)]
+        (println "Connection Accepted")
+        (handle-client client-socket))
+      (recur))))
+#+end_src
+
+もうちょっとClojureらしく書かせて欲しいという感情はありますが、とりあえずこれでできました。
