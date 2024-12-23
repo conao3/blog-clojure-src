@@ -10,7 +10,7 @@
 (def stasis-config {:stasis/ignore-nil-pages? true})
 
 (defn render-page [{:keys [title body]}]
-  (hiccup.page/html5
+  (hiccup.page/html5 {:lang "ja"}
    [:head
     [:meta {:http-equiv "Content-Type" :content "text/html; charset=utf-8"}]
     [:meta {:name "viewport" :content "width=device-width,initial-scale=1"}]
