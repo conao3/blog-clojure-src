@@ -10,5 +10,6 @@
   "description": "",
   "devDependencies": {
     "wrangler": "^3.99.0"
-  }
+  },
+  "packageManager": "npm@9.6.7+sha1.11902e3f00d4175bbd305e646ed82c2a14f1f588"
 }
