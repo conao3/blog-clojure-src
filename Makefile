@@ -8,6 +8,10 @@ dev:
 build:
 	clojure -X blog-clojure.core/export
 
+.PHONY: deploy
+deploy:
+	npx wrangler pages deploy
+
 resources/spectrum:
 	mkdir -p $@
 
